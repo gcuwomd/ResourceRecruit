@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.resourceserver.mapper.UserMapper">
+<!--    示例，通过id找到com.example.resourceserver.mapper.UserMapper对应的接口，在service层调用时调用接口提供的函数名，会自动调用函数名对应的sql-->
+    <update id="reset"  >
+        update unity_user set password=#{password} where username=#{username}
+    </update>
+
+</mapper>
