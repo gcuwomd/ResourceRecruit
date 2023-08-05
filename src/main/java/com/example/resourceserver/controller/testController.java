@@ -1,6 +1,8 @@
 package com.example.resourceserver.controller;
 
 
+import com.example.resourceserver.Service.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,7 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class testController {
-
+@Autowired
+User userService;
 
     @GetMapping("/test")
     public String test01() {
@@ -30,6 +33,7 @@ public class testController {
     public String app() {
         return "app";
     }
+
 
 }
 

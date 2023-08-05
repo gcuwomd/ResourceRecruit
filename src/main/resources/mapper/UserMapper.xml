@@ -7,5 +7,10 @@
     <update id="reset"  >
         update unity_user set password=#{password} where username=#{username}
     </update>
-
+    <select id="getAllInfo" resultType="com.example.resourceserver.pojo.Users">
+        select * from recruit_user
+    </select>
+    <select id="getVolunteer" resultType="com.example.resourceserver.pojo.Volunteer">
+        SELECT department_name,level FROM department,volunteer WHERE department_id=volunteer_department AND id =#{id}
+    </select>
 </mapper>
