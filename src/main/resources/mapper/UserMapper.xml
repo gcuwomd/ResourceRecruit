@@ -3,14 +3,80 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.resourceserver.mapper.UserMapper">
-<!--    示例，通过id找到com.example.resourceserver.mapper.UserMapper对应的接口，在service层调用时调用接口提供的函数名，会自动调用函数名对应的sql-->
-    <update id="reset"  >
-        update unity_user set password=#{password} where username=#{username}
-    </update>
+    <insert id="addImage">
+        insert into image (id,url) values (#{id},#{url})
+    </insert>
+    <insert id="insertStatus">
+        insert into  status (id,department_id,status) values (#{id},#{departmentId},0);
+    </insert>
+    <insert id="insertUsers">
+        insert into recruit_user(id,username,introduction,major,college,phone,gender) values (#{id},#{username},#{introduction},#{major},#{college},#{phone},#{gender})
+    </insert>
+    <insert id="insertVolunteerList">
+        insert into volunteer (id,volunteer_department,level) values (#{id},#{departmentId},#{level})
+    </insert>
+
+    <!--    示例，通过id找到com.example.resourceserver.mapper.UserMapper对应的接口，在service层调用时调用接口提供的函数名，会自动调用函数名对应的sql-->
     <select id="getAllInfo" resultType="com.example.resourceserver.pojo.Users">
-        select * from recruit_user
+        SELECT *
+        FROM recruit_user
+        WHERE id in
+              (SELECT id
+               FROM status
+               WHERE department_id in
+                     (SELECT department_id
+                      FROM department
+                      WHERE organization_id=#{organizationId}))
     </select>
     <select id="getVolunteer" resultType="com.example.resourceserver.pojo.Volunteer">
-        SELECT department_name,level FROM department,volunteer WHERE department_id=volunteer_department AND id =#{id}
+        SELECT department_name,
+               level
+        FROM department,volunteer
+        WHERE department_id=volunteer_department
+          AND id =#{id}
+
+    </select>
+    <select id="statistics" resultType="com.example.resourceserver.pojo.Statistics">
+        SELECT COUNT(status.department_id) AS num, department.department_name
+        FROM status
+                 JOIN department ON status.department_id = department.department_id
+        WHERE department.department_id IN (
+            SELECT department_id FROM department WHERE organization_id =#{organizationId}
+        )
+        GROUP BY department.department_name;
+
+
+    </select>
+    <select id="totalNumber" resultType="java.lang.Integer">
+        SELECT count(*) AS total
+        FROM `status`
+        WHERE department_id IN
+              (SELECT department_id
+               FROM department
+               WHERE organization_id=#{organizationId})
+    </select>
+    <select id="getImageById" resultType="com.example.resourceserver.pojo.Image">
+        select  url from  image where id =#{id}
+    </select>
+    <select id="organizationExist" resultType="java.lang.Boolean">
+        select  count(*) from  organization where organization_id=#{organizationId}
+    </select>
+    <select id="getInfoByDepartment" resultType="com.example.resourceserver.pojo.Users">
+        SELECT *
+        FROM recruit_user
+        WHERE id IN(SELECT id
+               FROM status
+               WHERE department_id=#{departmentId})
+    </select>
+    <select id="getInfoByKey" resultType="com.example.resourceserver.pojo.Users">
+        SELECT distinct *
+        FROM recruit_user
+        WHERE (id like  concat('%',#{key},'%')
+            OR username like  concat('%',#{key},'%')
+            OR major like  concat('%',#{key},'%')
+            OR college like  concat('%',#{key},'%')
+            OR phone like  concat('%',#{key},'%')) And id in
+            (select id  from status where department_id in(select department_id  from department
+                                                                              where organization_id=#{organizationId}) )
     </select>
 </mapper>

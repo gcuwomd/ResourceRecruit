@@ -57,21 +57,45 @@ public class OssUtil {
         cosClient = new COSClient(cred, clientConfig);
     }
 
-    public URL put(MultipartFile image, String key) throws IOException {
+    public URL put(MultipartFile image, String key)  {
 
 // 获取文件名
-        String fileName = image.getOriginalFilename();
+
 
 // 创建临时文件
-        File tempFile = File.createTempFile(fileName, "");
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile("tem", "");
+            // 将MultipartFile对象写入临时文件
+            image.transferTo(tempFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
 
-// 将MultipartFile对象写入临时文件
-        image.transferTo(tempFile);
+        }
+
+
 
 // 现在你可以使用tempFile作为一个普通的File对象进行操作了
         File file = tempFile;
 
 //            String key="img/"+id+".png";
+        boolean exist ;
+        boolean right=true;
+        for (int i=0;right;i++){
+            String keys="enroll/"+key+"-"+i+".png";
+            exist=cosClient.doesObjectExist(bucketName,keys);
+            if((!exist)){
+                PutObjectRequest putObjectRequest=new PutObjectRequest(bucketName,keys,file);
+                PutObjectResult putObjectResult=cosClient.putObject(putObjectRequest);
+                right=false;
+                return  cosClient.getObjectUrl(bucketName,keys);
+            }
+        }
+        //获取URL
+
+        return null;
+    }
+    public URL put(File file, String key){
         PutObjectRequest putObjectRequest=new PutObjectRequest(bucketName,key,file);
         PutObjectResult putObjectResult=cosClient.putObject(putObjectRequest);
         //获取URL
