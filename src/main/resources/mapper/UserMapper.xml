@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.resourceserver.mapper.UserMapper">
+<mapper namespace="com.example.resource.mapper.UserMapper">
     <insert id="addImage">
         insert into image (id,url) values (#{id},#{url})
     </insert>
@@ -15,9 +15,20 @@
     <insert id="insertVolunteerList">
         insert into volunteer (id,volunteer_department,level) values (#{id},#{departmentId},#{level})
     </insert>
+    <insert id="insertMessage">
+        insert into ReviceMessage (id,message)
+        select id ,#{text} from recruit_user where phone=#{phone}
+    </insert>
+    <update id="setMessageStatus">
+        update status SET MessageStatus=1
+        WHERE id IN
+                          <foreach collection="list" separator="," item="id" open="(" close=")">
+                              #{id}
+                          </foreach>
+    </update>
 
     <!--    示例，通过id找到com.example.resourceserver.mapper.UserMapper对应的接口，在service层调用时调用接口提供的函数名，会自动调用函数名对应的sql-->
-    <select id="getAllInfo" resultType="com.example.resourceserver.pojo.Users">
+    <select id="getAllInfo" resultType="com.example.resource.pojo.Users">
         SELECT *
         FROM recruit_user
         WHERE id in
@@ -28,7 +39,7 @@
                       FROM department
                       WHERE organization_id=#{organizationId}))
     </select>
-    <select id="getVolunteer" resultType="com.example.resourceserver.pojo.Volunteer">
+    <select id="getVolunteer" resultType="com.example.resource.pojo.Volunteer">
         SELECT department_name,
                level
         FROM department,volunteer
@@ -36,8 +47,8 @@
           AND id =#{id}
 
     </select>
-    <select id="statistics" resultType="com.example.resourceserver.pojo.Statistics">
-        SELECT COUNT(status.department_id) AS num, department.department_name
+    <select id="statistics" resultType="com.example.resource.pojo.Statistics">
+        SELECT COUNT(status.department_id) AS value, department.department_name as type
         FROM status
                  JOIN department ON status.department_id = department.department_id
         WHERE department.department_id IN (
@@ -55,20 +66,20 @@
                FROM department
                WHERE organization_id=#{organizationId})
     </select>
-    <select id="getImageById" resultType="com.example.resourceserver.pojo.Image">
+    <select id="getImageById" resultType="com.example.resource.pojo.Image">
         select  url from  image where id =#{id}
     </select>
     <select id="organizationExist" resultType="java.lang.Boolean">
         select  count(*) from  organization where organization_id=#{organizationId}
     </select>
-    <select id="getInfoByDepartment" resultType="com.example.resourceserver.pojo.Users">
+    <select id="getInfoByDepartment" resultType="com.example.resource.pojo.Users">
         SELECT *
         FROM recruit_user
         WHERE id IN(SELECT id
                FROM status
                WHERE department_id=#{departmentId})
     </select>
-    <select id="getInfoByKey" resultType="com.example.resourceserver.pojo.Users">
+    <select id="getInfoByKey" resultType="com.example.resource.pojo.Users">
         SELECT distinct *
         FROM recruit_user
         WHERE (id like  concat('%',#{key},'%')
@@ -79,4 +90,21 @@
             (select id  from status where department_id in(select department_id  from department
                                                                               where organization_id=#{organizationId}) )
     </select>
+    <select id="getPersonById" resultType="com.example.resource.pojo.MessagePerson">
+        SELECT DISTINCT recruit_user.id ,department_name, phone,username
+        FROM recruit_user,department,status
+        WHERE status.id=recruit_user.id
+          AND department.department_id=status.department_id
+
+              <if test="type =='face'"> AND status=0</if>
+              <if test="type =='pass'"> AND status=1</if>
+          AND recruit_user.id in
+              <foreach collection="list" item="item" open="(" close=")">
+                  #{item}
+              </foreach>
+    </select>
+    <select id="geMessageByDepartment" resultType="com.example.resource.pojo.MessageDetail">
+        SELECT DISTINCT recruit_user.id,username,	message FROM ReviceMessage,recruit_user WHERE recruit_user.id IN (SELECT id FROM status WHERE department_id = #{departmentId}) AND recruit_user.id=ReviceMessage.id
+    </select>
+
 </mapper>

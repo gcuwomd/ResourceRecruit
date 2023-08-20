@@ -45,6 +45,18 @@
             <artifactId>cos_api</artifactId>
             <version>5.6.133</version>
         </dependency>
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cmq-http-client</artifactId>
+            <version>1.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tencentcloudapi</groupId>
+            <artifactId>tencentcloud-sdk-java</artifactId>
+            <!-- go to https://search.maven.org/search?q=tencentcloud-sdk-java and get the latest version. -->
+            <!-- 请到https://search.maven.org/search?q=tencentcloud-sdk-java查询所有版本，最新版本如下 -->
+            <version>3.1.270</version>
+        </dependency>
 <!--        邮件发送-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
