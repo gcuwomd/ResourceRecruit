@@ -12,20 +12,104 @@
     <insert id="insertUsers">
         insert into recruit_user(id,username,introduction,major,college,phone,gender) values (#{id},#{username},#{introduction},#{major},#{college},#{phone},#{gender})
     </insert>
+    <insert id="postIp">
+        insert into userIp (ip,id) values (#{ip},#{id})
+    </insert>
     <insert id="insertVolunteerList">
-        insert into volunteer (id,volunteer_department,level) values (#{id},#{departmentId},#{level})
+        INSERT INTO volunteer (id, volunteer_department, level)
+        VALUES (#{id}, #{departmentId}, #{level})
+            ON DUPLICATE KEY UPDATE
+                                 volunteer_department = VALUES(volunteer_department),
+                                 level = VALUES(level);
     </insert>
+
     <insert id="insertMessage">
-        insert into ReviceMessage (id,message)
-        select id ,#{text} from recruit_user where phone=#{phone}
+        insert into ReviceMessage (id,message,messageId)
+        select id ,#{text},#{uuid} from recruit_user where phone=#{phone}
     </insert>
+    <insert id="registerUser" parameterType="com.example.resource.pojo.UserById">
+        INSERT INTO recruit_user (id, username, introduction, major, college, phone, gender)
+        VALUES (#{id}, #{username}, #{introduction}, #{major}, #{college}, #{phone}, #{gender})
+            ON DUPLICATE KEY UPDATE
+                                 introduction = VALUES(introduction),
+                                 major = VALUES(major),
+                                 college = VALUES(college),
+                                 phone = VALUES(phone),
+                                 gender = VALUES(gender);
+    </insert>
+
+    <insert id="registerImage" parameterType="com.example.resource.pojo.UserById">
+        INSERT INTO image (id, url)
+        VALUES (#{id}, #{url})
+            ON DUPLICATE KEY UPDATE
+                                 url = VALUES(url);
+    </insert>
+
+
+    <delete id="deleteMessages">
+        delete from ReviceMessage where messageId = #{uuid}
+    </delete>
+    <delete id="deleteUser">
+        delete from recruit_user where id = #{id};
+    </delete>
+    <delete id="deleteVolunteer">
+        delete from volunteer where id = #{id};
+    </delete>
+    <delete id="deleteImage">
+        delete from image where id = #{id};
+    </delete>
+    <delete id="deleteStatus">
+        delete from status where id = #{id};
+    </delete>
     <update id="setMessageStatus">
         update status SET MessageStatus=1
         WHERE id IN
-                          <foreach collection="list" separator="," item="id" open="(" close=")">
-                              #{id}
-                          </foreach>
+        <foreach collection="list" separator="," item="id" open="(" close=")">
+            #{id}
+        </foreach>
     </update>
+
+    <update id="updateUser">
+        update recruit_user
+        set username = #{username},
+            introduction = #{introduction},
+            major = #{major},
+            college = #{college},
+            phone = #{phone},
+            gender = #{gender}
+        where id = #{id}
+    </update>
+
+    <update id="updateVolunteer">
+        update volunteer
+            set volunteer_department = #{volunteer_department},
+                level = #{level}
+        where id= #{id}
+    </update>
+    <update id="updateStatus">
+        update status
+        set department_id = #{department_id},
+            status = #{status},
+            MessageStatus = #{MessageStatus}
+        where id = #{id}
+    </update>
+    <update id="updateImage">
+        update image
+        set url = #{url}
+        where id = #{id}
+    </update>
+    <update id="updateMessage">
+        update ReviceMessage
+        set message = #{message}
+        where messageId = #{messageId}
+    </update>
+    <update id="updateVolunteers">
+        update volunteer
+        set volunteer_department = #{departmentName},
+            level = #{level}
+        where id = #{id}
+    </update>
+
 
     <!--    示例，通过id找到com.example.resourceserver.mapper.UserMapper对应的接口，在service层调用时调用接口提供的函数名，会自动调用函数名对应的sql-->
     <select id="getAllInfo" resultType="com.example.resource.pojo.Users">
@@ -45,7 +129,6 @@
         FROM department,volunteer
         WHERE department_id=volunteer_department
           AND id =#{id}
-
     </select>
     <select id="statistics" resultType="com.example.resource.pojo.Statistics">
         SELECT COUNT(status.department_id) AS value, department.department_name as type
@@ -104,7 +187,79 @@
               </foreach>
     </select>
     <select id="geMessageByDepartment" resultType="com.example.resource.pojo.MessageDetail">
-        SELECT DISTINCT recruit_user.id,username,	message FROM ReviceMessage,recruit_user WHERE recruit_user.id IN (SELECT id FROM status WHERE department_id = #{departmentId}) AND recruit_user.id=ReviceMessage.id
+        SELECT DISTINCT recruit_user.id, username, message, ReviceMessage.messageId
+        FROM ReviceMessage, recruit_user
+        WHERE recruit_user.id IN (SELECT id FROM status WHERE department_id = #{departmentId})
+          AND recruit_user.id = ReviceMessage.id
     </select>
+
+    <select id="getUserById" resultType="com.example.resource.pojo.Users">
+        select * from recruit_user where id = #{id}
+    </select>
+    <select id="ipLookups" resultType="java.lang.String">
+        select * from userIp where ip = #{ip}
+    </select>
+    <select id="ipCheck" resultType="java.lang.Boolean">
+        select COUNT(*) > 0 from userIp where ip = #{ip}
+    </select>
+    <select id="getImage" resultType="com.example.resource.pojo.Image">
+        select * from image where id = #{id}
+    </select>
+    <select id="getMessages" resultType="com.example.resource.pojo.Message">
+        select * from ReviceMessage where id =#{id}
+    </select>
+    <select id="getStatus" resultType="com.example.resource.pojo.Status">
+        SELECT id,department_name,
+               status,MessageStatus
+        FROM status,department
+        WHERE department.department_id=status.department_id
+          AND id =#{id}
+    </select>
+    <select id="getVolunteers" resultType="com.example.resource.pojo.Volunteer">
+        SELECT id,department_name,
+               level
+        FROM department,volunteer
+        WHERE department_id=volunteer_department
+          AND id =#{id}
+    </select>
+    <select id="getStatusById" resultType="com.example.resource.pojo.UpdateStatus">
+        SELECT * FROM status WHERE id =#{id}
+    </select>
+    <select id="getImageByid" resultType="com.example.resource.pojo.Image">
+        SELECT * FROM image WHERE id =#{id}
+    </select>
+    <select id="getMessagesByUuid" resultType="com.example.resource.pojo.Message">
+        SELECT * FROM ReviceMessage WHERE messageId = #{messageId}
+    </select>
+    <select id="fetchUserData" resultType="com.example.resource.pojo.Excel">
+        SELECT
+            recruit_user.*,
+            GROUP_CONCAT(DISTINCT image.url ORDER BY image.url ASC SEPARATOR ',') AS image_urls,
+            status.status,
+            department_names.department_names
+        FROM recruit_user
+                 LEFT JOIN image ON recruit_user.id = image.id COLLATE utf8mb4_0900_ai_ci
+                 LEFT JOIN status ON recruit_user.id = status.id COLLATE utf8mb4_0900_ai_ci
+                 LEFT JOIN volunteer ON recruit_user.id = volunteer.id COLLATE utf8mb4_0900_ai_ci
+                 LEFT JOIN (
+            SELECT
+                volunteer.id AS volunteer_id,
+                GROUP_CONCAT(DISTINCT department.department_name
+                     ORDER BY volunteer.level ASC, department.department_name ASC
+                     SEPARATOR ',') AS department_names
+            FROM volunteer
+                     INNER JOIN department ON volunteer.volunteer_department = department.department_id
+            GROUP BY volunteer.id
+        ) AS department_names ON volunteer.id = department_names.volunteer_id
+        GROUP BY recruit_user.id, status.status, status.MessageStatus, department_names.department_names;
+
+    </select>
+    <select id="getUserId" resultType="com.example.resource.pojo.UserById">
+        select recruit_user.*
+        from recruit_user
+        where recruit_user.id = #{id};
+    </select>
+
+
 
 </mapper>

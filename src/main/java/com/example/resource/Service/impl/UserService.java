@@ -8,9 +8,11 @@ import com.example.resource.mapper.UserMapper;
 import com.example.resource.pojo.*;
 import com.example.resource.util.MeaasgeUtil;
 import com.example.resource.util.OssUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -63,19 +65,57 @@ public class UserService implements User {
     }
 
     @Override
+    public void register(JSONObject json) {
+
+    }
+
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void register(Users users, ArrayList arrayList) {
-        userMapper.insertUsers(users);
-        String id = users.getId();
-        for (Object item : arrayList) {
+    public void postIp(HttpServletRequest request, String id){
+        String ip = request.getRemoteAddr();
+        userMapper.postIp(ip,id);
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserInfo(Users updatedUser, ArrayList updatedVolunteerList) {
+        userMapper.updateUser(updatedUser);
+        String id = updatedUser.getId();
+        for (Object item : updatedVolunteerList) {
             JSONObject object = (JSONObject) JSON.toJSON(item);
             Integer level = Integer.parseInt(object.getString("level"));
-            userMapper.insertVolunteerList(id, object.getString("volunteer"), level);
+            userMapper.updateVolunteer(updatedVolunteerList);
             if (level == 1) {
                 userMapper.insertStatus(id, object.getString("volunteer"));
             }
         }
     }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteUser(String id){
+        userMapper.deleteUser(id);
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteVolunteer(String id){
+        userMapper.deleteVolunteer(id);
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteImage(String id){
+        userMapper.deleteImage(id);
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteStatus(String id){
+        userMapper.deleteStatus(id);
+    }
+
+
 
     /**
      * @param key 根据关键词查找用户信息
@@ -159,8 +199,6 @@ public class UserService implements User {
             array_userInfo.add(personSingle);
 
         }
-        ;
         return array_userInfo;
     }
-
 }

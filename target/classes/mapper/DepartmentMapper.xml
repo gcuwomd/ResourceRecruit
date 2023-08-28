@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.resource.mapper.DepartmentMapper">
+    <update id="nextDepartment">
+        UPDATE `status`
+        SET status=0,
+            MessageStatus=0,
+            department_id = (SELECT volunteer_department
+                             FROM (SELECT volunteer_department
+                                   FROM volunteer
+                                   WHERE `level` > (SELECT `level`
+                                                    FROM volunteer
+                                                    WHERE id = #{id}
+                                                      AND volunteer_department = (SELECT department_id
+                                                                                  FROM `status`
+                                                                                  WHERE id = #{id}))
+                                     AND id = #{id} order by level LIMIT 1) AS subquery)
+        WHERE id = #{id};
+    </update>
+    <update id="changeToPassStatus">
+        UPDATE  status set status =1,MessageStatus=0 where id=#{id};
+    </update>
+    <update id="changeToNoPassStatus">
+        UPDATE  status set status =-1,,MessageStatus=0  where id=#{id}
+
+    </update>
+
+    <select id="choosePassPerson" resultType="com.example.resource.pojo.Users">
+        SELECT recruit_user.id,username,introduction,major,college,phone,gender,MessageStatus from recruit_user,status  WHERE department_id=#{departmentId} AND status=1 AND recruit_user.id = status.id;
+
+    </select>
+    <select id="chooseWillPassPerson" resultType="com.example.resource.pojo.Users">
+        SELECT recruit_user.id,username,introduction,major,college,phone,gender,MessageStatus from recruit_user,status  WHERE department_id=#{departmentId} AND status=0 AND recruit_user.id = status.id;
+    </select>
+    <select id="chooseNotPassPerson" resultType="com.example.resource.pojo.Users">
+        SELECT recruit_user.id, username,introduction,major,college,phone,gender,MessageStatus from recruit_user,status  WHERE department_id=#{departmentId} AND status=-1 AND recruit_user.id= status.id
+    </select>
+    <select id="departmentExist" resultType="java.lang.Boolean">
+        select  count(*) from department where department_id=#{departmentId};
+    </select>
+    <select id="userExist" resultType="java.lang.Boolean">
+        select  count(*) from recruit_user where id=#{id}
+    </select>
+    <select id="selectMessageId" resultType="java.lang.Boolean">
+        select count(*) from ReviceMessage where messageId = #{messageId};
+    </select>
+
+
+</mapper>

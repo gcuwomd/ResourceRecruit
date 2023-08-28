@@ -7,4 +7,5 @@ public class MessageDetail {
     private  String username;
     private  String id;
     private String message;
+    private  String messageId;
 }
