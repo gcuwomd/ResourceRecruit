@@ -19,10 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @RestController
 public class UserController {
@@ -85,7 +82,7 @@ public class UserController {
     }
 
     @PostMapping("user/register")
-    ResultUtil register(@RequestBody JSONObject json){
+    ResultUtil register(@RequestBody JSONObject json) {
         String id = json.getString("id");
         String username = json.getString("username");
         String introduction = json.getString("introduction");
@@ -93,10 +90,8 @@ public class UserController {
         String college = json.getString("college");
         String gender = json.getString("gender");
         String phone = json.getString("phone");
-        String url = json.getString("url");
-        JSONArray volunteerArray = json.getJSONArray("volunteer"); // Assuming volunteer is an array of objects
+        JSONArray volunteerArray = json.getJSONArray("volunteer");
 
-        // Extract departmentId and level from the JSON array
         List<String> departmentIds = new ArrayList<>();
         List<String> levels = new ArrayList<>();
         for (int i = 0; i < volunteerArray.size(); i++) {
@@ -108,10 +103,8 @@ public class UserController {
         }
 
         userMapper.registerUser(id, username, introduction, major, college, gender, phone);
-        userMapper.registerImage(id, url);
         userMapper.deleteVolunteer(id);
 
-        // Insert volunteerList using the extracted departmentIds and levels
         for (int i = 0; i < departmentIds.size(); i++) {
             String departmentId = departmentIds.get(i);
             String level = levels.get(i);
@@ -119,6 +112,7 @@ public class UserController {
         }
         return ResultUtil.sucess();
     }
+
 
     @PutMapping("/user/updateImage")
     public ResultUtil update(@RequestBody JSONObject json){
@@ -191,25 +185,46 @@ public class UserController {
         String id = userMapper.ipLookups(ip);
         if (id != null) {
             List<Object> resultArray = new ArrayList<>();
-            resultArray.add(userMapper.getUserId(id));
+
+            UserGetById userGetById = userMapper.userGetById(id);
 
             List<Image> images = userMapper.getImage(id);
-            List<String> imageURLs = new ArrayList<>();
+            List<Volunteer> volunteers = userMapper.getVolunteers(id);
 
+            Map<String, String> volunteerInfo = new HashMap<>();
+            for (Volunteer volunteer : volunteers){
+                volunteerInfo.put(volunteer.getLevel(), volunteer.getDepartmentName());
+            }
+
+            List<String> imageURLs = new ArrayList<>();
             for (Image image : images) {
                 imageURLs.add(image.getUrl());
             }
 
-            resultArray.add(imageURLs);
+            JSONObject imageInfo = new JSONObject();
+            int i = 1;
+            for (String imageUrl : imageURLs) {
+                imageInfo.put(Integer.toString(i++), imageUrl);
+            }
+
+            JSONObject userInfo = new JSONObject();
+            userInfo.put("username", userGetById.getUsername());
+            userInfo.put("id", userGetById.getId());
+            userInfo.put("introduction", userGetById.getIntroduction());
+            userInfo.put("major", userGetById.getMajor());
+            userInfo.put("college", userGetById.getCollege());
+            userInfo.put("phone", userGetById.getPhone());
+            userInfo.put("gender", userGetById.getGender());
+            userInfo.put("volunteer", volunteerInfo);
+            userInfo.put("image", imageInfo);
+
+            resultArray.add(userInfo);
 
             return new ResultUtil(200, "查询成功", resultArray);
         } else {
             return new ResultUtil(404, "用户不存在", null);
         }
     }
-
-
-
 
     @DeleteMapping("/user/delete")
     ResultUtil deleteUser(@RequestParam String id) {

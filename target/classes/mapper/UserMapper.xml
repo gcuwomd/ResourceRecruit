@@ -254,7 +254,7 @@
         GROUP BY recruit_user.id, status.status, status.MessageStatus, department_names.department_names;
 
     </select>
-    <select id="getUserId" resultType="com.example.resource.pojo.UserById">
+    <select id="userGetById" resultType="com.example.resource.pojo.UserGetById">
         select recruit_user.*
         from recruit_user
         where recruit_user.id = #{id};

@@ -11,6 +11,7 @@ com\example\resource\pojo\Image.class
 com\example\resource\pojo\Message.class
 com\example\resource\util\uuidUtil.class
 com\example\resource\pojo\Users.class
+com\example\resource\pojo\User.class
 com\example\resource\handler\ExceptionsHandler.class
 com\example\resource\util\ExcalUtil.class
 com\example\resource\util\RedisUtil.class
@@ -21,6 +22,7 @@ com\example\resource\pojo\MessagePerson.class
 com\example\resource\Service\Department.class
 com\example\resource\controller\UserController.class
 com\example\resource\controller\DepartmentController.class
+com\example\resource\pojo\UserGetById.class
 com\example\resource\config\RedisConfig.class
 com\example\resource\pojo\UserById.class
 com\example\resource\pojo\Excel.class

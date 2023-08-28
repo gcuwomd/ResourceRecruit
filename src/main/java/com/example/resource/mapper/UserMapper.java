@@ -90,7 +90,7 @@ public interface UserMapper {
 
     List<Excel> fetchUserData();
 
-    List<UserById> getUserId(String id);
+    UserGetById userGetById(String id);
 
     void registerImage(String id,String url);
 
