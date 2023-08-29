@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.resource.Service.User;
+import com.example.resource.Service.impl.UserService;
 import com.example.resource.mapper.DepartmentMapper;
 import com.example.resource.mapper.UserMapper;
 import com.example.resource.pojo.*;
@@ -82,7 +83,10 @@ public class UserController {
     }
 
     @PostMapping("user/register")
-    ResultUtil register(@RequestBody JSONObject json) {
+    ResultUtil register(HttpServletRequest request,@RequestBody JSONObject json) {
+        String ip = request.getRemoteAddr();
+        String id = json.getString("id");
+        userMapper.postIp(ip,id);
         if (user.register(json)) {
             return ResultUtil.sucess();
         }
@@ -91,7 +95,7 @@ public class UserController {
 
 
     @PutMapping("/user/updateImage")
-    public ResultUtil update(@RequestBody JSONObject json){
+    public ResultUtil update(HttpServletRequest request,@RequestBody JSONObject json){
         String id = json.getString("id");
 
         if (!departmentMapper.userExist(id)) {
@@ -145,17 +149,7 @@ public class UserController {
 
     }
 
-    @PostMapping("/user/ip")
-    ResultUtil postIp(HttpServletRequest request, String id){
-        String ip = request.getRemoteAddr();
-        if (!userMapper.ipCheck(ip)){
-            userMapper.postIp(ip,id);
-        }
-        return ResultUtil.sucess();
-    }
-
-
-    @GetMapping("/user/get")
+    @GetMapping("/user/ip")
     ResultUtil getUserByIp(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         String id = userMapper.ipLookups(ip);

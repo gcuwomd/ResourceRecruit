@@ -75,6 +75,7 @@ public class UserService implements User {
         String gender = json.getString("gender");
         String phone = json.getString("phone");
         JSONArray volunteerArray = json.getJSONArray("volunteer");
+
         userMapper.registerUser(id, username, introduction, major, college, gender, phone);
         userMapper.deleteVolunteer(id);
         userMapper.insertVolunteerList(volunteerArray,id);
@@ -88,24 +89,14 @@ public class UserService implements User {
         List<Image> images = userMapper.getImage(id);
         List<Volunteer> volunteers = userMapper.getVolunteers(id);
 
-        Map<String, String> volunteerInfo = new HashMap<>();
+
         for (Volunteer volunteer : volunteers){
-            volunteerInfo.put(volunteer.getLevel(), volunteer.getDepartmentName());
+            volunteer.getLevel();
+            volunteer.getDepartmentName();
         }
 
-        List<String> imageURLs = new ArrayList<>();
-        for (Image image : images) {
-            imageURLs.add(image.getUrl());
-        }
-
-        JSONObject imageInfo = new JSONObject();
-        int i = 1;
-        for (String imageUrl : imageURLs) {
-            imageInfo.put(Integer.toString(i++), imageUrl);
-        }
         JSONObject json = (JSONObject) JSON.toJSON(userGetById);
-        json.put("volunteer", volunteerInfo);
-        json.put("image", imageInfo);
+        json.put("volunteer", volunteers);
         return json;
     }
 

@@ -12,9 +12,12 @@
     <insert id="insertUsers">
         insert into recruit_user(id,username,introduction,major,college,phone,gender) values (#{id},#{username},#{introduction},#{major},#{college},#{phone},#{gender})
     </insert>
-    <insert id="postIp">
-        insert into userIp (ip,id) values (#{ip},#{id})
+    <insert id="postIp" parameterType="com.example.resource.pojo.PostIp">
+        INSERT INTO userIp (ip, id)
+        VALUES (#{ip}, #{id})
+            ON DUPLICATE KEY UPDATE id = VALUES(id)
     </insert>
+
     <insert id="insertVolunteerList">
         INSERT INTO volunteer (id, volunteer_department, level)
         VALUES
@@ -33,6 +36,7 @@
         INSERT INTO recruit_user (id, username, introduction, major, college, phone, gender)
         VALUES (#{id}, #{username}, #{introduction}, #{major}, #{college}, #{phone}, #{gender})
             ON DUPLICATE KEY UPDATE
+                                 username = VALUES(username),
                                  introduction = VALUES(introduction),
                                  major = VALUES(major),
                                  college = VALUES(college),
@@ -215,6 +219,7 @@
         FROM department,volunteer
         WHERE department_id=volunteer_department
           AND id =#{id}
+        order by level
     </select>
     <select id="getStatusById" resultType="com.example.resource.pojo.UpdateStatus">
         SELECT * FROM status WHERE id =#{id}
