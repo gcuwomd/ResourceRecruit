@@ -30,7 +30,7 @@ public interface UserMapper {
 
     boolean insertUsers(Users users);
 
-    boolean insertVolunteerList(String id, String departmentId, String level);
+    boolean insertVolunteerList(List list,String id);
 
     List<MessagePerson> getPersonById(String type, List list);
 

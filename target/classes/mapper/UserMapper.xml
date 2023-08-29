@@ -17,11 +17,13 @@
     </insert>
     <insert id="insertVolunteerList">
         INSERT INTO volunteer (id, volunteer_department, level)
-        VALUES (#{id}, #{departmentId}, #{level})
-            ON DUPLICATE KEY UPDATE
-                                 volunteer_department = VALUES(volunteer_department),
-                                 level = VALUES(level);
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{id}, #{item.departmentId}, #{item.level})
+        </foreach>
     </insert>
+
+
 
     <insert id="insertMessage">
         insert into ReviceMessage (id,message,messageId)
@@ -37,14 +39,6 @@
                                  phone = VALUES(phone),
                                  gender = VALUES(gender);
     </insert>
-
-    <insert id="registerImage" parameterType="com.example.resource.pojo.UserById">
-        INSERT INTO image (id, url)
-        VALUES (#{id}, #{url})
-            ON DUPLICATE KEY UPDATE
-                                 url = VALUES(url);
-    </insert>
-
 
     <delete id="deleteMessages">
         delete from ReviceMessage where messageId = #{uuid}

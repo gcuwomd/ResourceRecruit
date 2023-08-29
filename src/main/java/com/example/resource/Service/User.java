@@ -20,7 +20,10 @@ public interface User {
     JSONArray InfoByDepartment(String departmentId);
 
     @Transactional(rollbackFor = Exception.class)
-    void register(@RequestBody JSONObject json);
+    boolean register(@RequestBody JSONObject json);
+
+
+    JSONObject getUserByIp(String id);
 
     void postIp(HttpServletRequest request, String id);
 

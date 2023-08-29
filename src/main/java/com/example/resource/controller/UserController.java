@@ -83,34 +83,10 @@ public class UserController {
 
     @PostMapping("user/register")
     ResultUtil register(@RequestBody JSONObject json) {
-        String id = json.getString("id");
-        String username = json.getString("username");
-        String introduction = json.getString("introduction");
-        String major = json.getString("major");
-        String college = json.getString("college");
-        String gender = json.getString("gender");
-        String phone = json.getString("phone");
-        JSONArray volunteerArray = json.getJSONArray("volunteer");
-
-        List<String> departmentIds = new ArrayList<>();
-        List<String> levels = new ArrayList<>();
-        for (int i = 0; i < volunteerArray.size(); i++) {
-            JSONObject volunteerObject = volunteerArray.getJSONObject(i);
-            String departmentId = volunteerObject.getString("departmentId");
-            String level = volunteerObject.getString("level");
-            departmentIds.add(departmentId);
-            levels.add(level);
+        if (user.register(json)) {
+            return ResultUtil.sucess();
         }
-
-        userMapper.registerUser(id, username, introduction, major, college, gender, phone);
-        userMapper.deleteVolunteer(id);
-
-        for (int i = 0; i < departmentIds.size(); i++) {
-            String departmentId = departmentIds.get(i);
-            String level = levels.get(i);
-            userMapper.insertVolunteerList(id, departmentId, level);
-        }
-        return ResultUtil.sucess();
+       return  ResultUtil.error();
     }
 
 
@@ -180,47 +156,11 @@ public class UserController {
 
 
     @GetMapping("/user/get")
-    ResultUtil getUser(HttpServletRequest request) {
+    ResultUtil getUserByIp(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         String id = userMapper.ipLookups(ip);
         if (id != null) {
-            List<Object> resultArray = new ArrayList<>();
-
-            UserGetById userGetById = userMapper.userGetById(id);
-
-            List<Image> images = userMapper.getImage(id);
-            List<Volunteer> volunteers = userMapper.getVolunteers(id);
-
-            Map<String, String> volunteerInfo = new HashMap<>();
-            for (Volunteer volunteer : volunteers){
-                volunteerInfo.put(volunteer.getLevel(), volunteer.getDepartmentName());
-            }
-
-            List<String> imageURLs = new ArrayList<>();
-            for (Image image : images) {
-                imageURLs.add(image.getUrl());
-            }
-
-            JSONObject imageInfo = new JSONObject();
-            int i = 1;
-            for (String imageUrl : imageURLs) {
-                imageInfo.put(Integer.toString(i++), imageUrl);
-            }
-
-            JSONObject userInfo = new JSONObject();
-            userInfo.put("username", userGetById.getUsername());
-            userInfo.put("id", userGetById.getId());
-            userInfo.put("introduction", userGetById.getIntroduction());
-            userInfo.put("major", userGetById.getMajor());
-            userInfo.put("college", userGetById.getCollege());
-            userInfo.put("phone", userGetById.getPhone());
-            userInfo.put("gender", userGetById.getGender());
-            userInfo.put("volunteer", volunteerInfo);
-            userInfo.put("image", imageInfo);
-
-            resultArray.add(userInfo);
-
-            return new ResultUtil(200, "查询成功", resultArray);
+            return new ResultUtil(200, "查询成功",  user.getUserByIp(id));
         } else {
             return new ResultUtil(404, "用户不存在", null);
         }

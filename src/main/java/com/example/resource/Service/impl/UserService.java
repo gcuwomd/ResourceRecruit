@@ -12,13 +12,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService implements User {
@@ -65,8 +66,47 @@ public class UserService implements User {
     }
 
     @Override
-    public void register(JSONObject json) {
+    public boolean register(JSONObject json) {
+        String id = json.getString("id");
+        String username = json.getString("username");
+        String introduction = json.getString("introduction");
+        String major = json.getString("major");
+        String college = json.getString("college");
+        String gender = json.getString("gender");
+        String phone = json.getString("phone");
+        JSONArray volunteerArray = json.getJSONArray("volunteer");
+        userMapper.registerUser(id, username, introduction, major, college, gender, phone);
+        userMapper.deleteVolunteer(id);
+        userMapper.insertVolunteerList(volunteerArray,id);
+        return true;
+    }
 
+    @Override
+    public JSONObject getUserByIp(String id){
+        UserGetById userGetById = userMapper.userGetById(id);
+
+        List<Image> images = userMapper.getImage(id);
+        List<Volunteer> volunteers = userMapper.getVolunteers(id);
+
+        Map<String, String> volunteerInfo = new HashMap<>();
+        for (Volunteer volunteer : volunteers){
+            volunteerInfo.put(volunteer.getLevel(), volunteer.getDepartmentName());
+        }
+
+        List<String> imageURLs = new ArrayList<>();
+        for (Image image : images) {
+            imageURLs.add(image.getUrl());
+        }
+
+        JSONObject imageInfo = new JSONObject();
+        int i = 1;
+        for (String imageUrl : imageURLs) {
+            imageInfo.put(Integer.toString(i++), imageUrl);
+        }
+        JSONObject json = (JSONObject) JSON.toJSON(userGetById);
+        json.put("volunteer", volunteerInfo);
+        json.put("image", imageInfo);
+        return json;
     }
 
 
