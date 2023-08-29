@@ -8,6 +8,7 @@ import com.example.resource.mapper.UserMapper;
 import com.example.resource.pojo.*;
 import com.example.resource.util.MeaasgeUtil;
 import com.example.resource.util.OssUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService implements User {
@@ -63,19 +66,87 @@ public class UserService implements User {
     }
 
     @Override
+    public boolean register(JSONObject json) {
+        String id = json.getString("id");
+        String username = json.getString("username");
+        String introduction = json.getString("introduction");
+        String major = json.getString("major");
+        String college = json.getString("college");
+        String gender = json.getString("gender");
+        String phone = json.getString("phone");
+        JSONArray volunteerArray = json.getJSONArray("volunteer");
+
+        userMapper.registerUser(id, username, introduction, major, college, gender, phone);
+        userMapper.deleteVolunteer(id);
+        userMapper.insertVolunteerList(volunteerArray,id);
+        return true;
+    }
+
+    @Override
+    public JSONObject getUserByIp(String id){
+        UserGetById userGetById = userMapper.userGetById(id);
+
+        List<Image> images = userMapper.getImage(id);
+        List<Volunteer> volunteers = userMapper.getVolunteers(id);
+
+
+        for (Volunteer volunteer : volunteers){
+            volunteer.getLevel();
+            volunteer.getDepartmentName();
+        }
+
+        JSONObject json = (JSONObject) JSON.toJSON(userGetById);
+        json.put("volunteer", volunteers);
+        return json;
+    }
+
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void register(Users users, ArrayList arrayList) {
-        userMapper.insertUsers(users);
-        String id = users.getId();
-        for (Object item : arrayList) {
+    public void postIp(HttpServletRequest request, String id){
+        String ip = request.getRemoteAddr();
+        userMapper.postIp(ip,id);
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserInfo(Users updatedUser, ArrayList updatedVolunteerList) {
+        userMapper.updateUser(updatedUser);
+        String id = updatedUser.getId();
+        for (Object item : updatedVolunteerList) {
             JSONObject object = (JSONObject) JSON.toJSON(item);
             Integer level = Integer.parseInt(object.getString("level"));
-            userMapper.insertVolunteerList(id, object.getString("volunteer"), level);
+            userMapper.updateVolunteer(updatedVolunteerList);
             if (level == 1) {
                 userMapper.insertStatus(id, object.getString("volunteer"));
             }
         }
     }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteUser(String id){
+        userMapper.deleteUser(id);
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteVolunteer(String id){
+        userMapper.deleteVolunteer(id);
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteImage(String id){
+        userMapper.deleteImage(id);
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteStatus(String id){
+        userMapper.deleteStatus(id);
+    }
+
+
 
     /**
      * @param key 根据关键词查找用户信息
@@ -159,8 +230,6 @@ public class UserService implements User {
             array_userInfo.add(personSingle);
 
         }
-        ;
         return array_userInfo;
     }
-
 }

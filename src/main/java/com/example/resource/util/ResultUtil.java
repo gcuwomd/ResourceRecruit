@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +19,7 @@ public class ResultUtil {
         this.message = messagesg;
         this.data = data;
     }
+
 
     public  static ResultUtil sucess(Object data){
         return  new ResultUtil(200,"sucess",data);

@@ -17,4 +17,5 @@ public interface DepartmentMapper {
     boolean departmentExist(String departmentId);
     boolean userExist(String id);
 
+    boolean selectMessageId(String messageId);
 }
