@@ -79,6 +79,13 @@ public class UserService implements User {
         userMapper.registerUser(id, username, introduction, major, college, gender, phone);
         userMapper.deleteVolunteer(id);
         userMapper.insertVolunteerList(volunteerArray,id);
+        for (Object item : volunteerArray) {
+            JSONObject object = (JSONObject) JSON.toJSON(item);
+            Integer level = Integer.parseInt(object.getString("level"));
+            if (level == 1) {
+                userMapper.InsertStatus(id,object.getString("departmentId"));
+            }
+        }
         return true;
     }
 
@@ -86,28 +93,12 @@ public class UserService implements User {
     public JSONObject getUserByIp(String id){
         UserGetById userGetById = userMapper.userGetById(id);
 
-        List<Image> images = userMapper.getImage(id);
-        List<Volunteer> volunteers = userMapper.getVolunteers(id);
-
-
-        for (Volunteer volunteer : volunteers){
-            volunteer.getLevel();
-            volunteer.getDepartmentName();
-        }
+        List<UpdateVolunteer> volunteers = userMapper.getVolunteers(id);
 
         JSONObject json = (JSONObject) JSON.toJSON(userGetById);
         json.put("volunteer", volunteers);
         return json;
     }
-
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void postIp(HttpServletRequest request, String id){
-        String ip = request.getRemoteAddr();
-        userMapper.postIp(ip,id);
-    }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)

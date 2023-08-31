@@ -25,8 +25,6 @@ public interface User {
 
     JSONObject getUserByIp(String id);
 
-    void postIp(HttpServletRequest request, String id);
-
     void updateUserInfo(Users updateUser, ArrayList updateArrayList);
 
     void deleteUser(String id);

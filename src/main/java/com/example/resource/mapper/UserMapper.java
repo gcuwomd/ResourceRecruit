@@ -1,5 +1,6 @@
 package com.example.resource.mapper;
 
+import com.alibaba.fastjson.JSONArray;
 import com.example.resource.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -70,7 +71,7 @@ public interface UserMapper {
 
     List<Image> getImage(String id);
 
-    List<Volunteer> getVolunteers(String id);
+    List<UpdateVolunteer> getVolunteers(String id);
 
     void updateStatus(UpdateStatus existStatus);
 
@@ -98,4 +99,9 @@ public interface UserMapper {
 
 
     void insertVolunteer(String id, ArrayList arrayList);
+
+
+    void InsertStatus(String id, String departmentId);
+
+    String invertDepartmentId(String departmentId);
 }

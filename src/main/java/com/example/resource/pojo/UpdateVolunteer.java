@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class UpdateVolunteer {
-    private String id;
-    private  String departmentName;
+    private  String volunteerDepartment;
     private  String level;
 }

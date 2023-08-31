@@ -14,7 +14,9 @@ import com.example.resource.util.uuidUtil;
 import com.qcloud.cos.utils.IOUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +25,7 @@ import java.net.URLEncoder;
 import java.util.*;
 
 @RestController
+@Slf4j
 public class UserController {
     @Autowired
     DepartmentMapper departmentMapper;
@@ -50,7 +53,6 @@ public class UserController {
                 fileName.toLowerCase().endsWith(".gif") ||
                 fileName.toLowerCase().endsWith(".bmp")))) {
             return new ResultUtil(400, "只能上传图片", null);
-
         }
         if (id.length() != 12) {
             return new ResultUtil(403, "id不合法", null);
@@ -114,9 +116,14 @@ public class UserController {
     }
 
     @PutMapping("/user/updateUser")
-    public ResultUtil updateUser(@RequestBody JSONObject json) {
-        String id = json.getString("id");
+    public ResultUtil updateUser(HttpServletRequest request,@RequestBody JSONObject json) {
+        String ip = request.getHeader("X-Real-IP");
+        String ip1 = request.getHeader("X-Forwarded-For");
+        String ip2 = request.getHeader("X-Forwarded-Proto");
 
+
+        String id = json.getString("id");
+        userMapper.postIp(ip,id);
         if (!departmentMapper.userExist(id)) {
             return new ResultUtil(403, "你还未报名，请检查学号", null);
         }
@@ -149,9 +156,11 @@ public class UserController {
 
     }
 
+
+
     @GetMapping("/user/ip")
     ResultUtil getUserByIp(HttpServletRequest request) {
-        String ip = request.getRemoteAddr();
+        String ip = request.getHeader("x-forwarded-for");
         String id = userMapper.ipLookups(ip);
         if (id != null) {
             return new ResultUtil(200, "查询成功",  user.getUserByIp(id));
