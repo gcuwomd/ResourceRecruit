@@ -4,18 +4,22 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.resource.mapper.UserMapper">
     <insert id="addImage">
-        insert into image (id,url) values (#{id},#{url})
+        insert into image (id, url)
+        values (#{id}, #{url})
     </insert>
     <insert id="insertStatus">
-        insert into  status (id,department_id,status) values (#{id},#{departmentId},0);
+        insert into status (id, department_id, status)
+        values (#{id}, #{departmentId}, 0);
     </insert>
     <insert id="insertUsers">
-        insert into recruit_user(id,username,introduction,major,college,phone,gender) values (#{id},#{username},#{introduction},#{major},#{college},#{phone},#{gender})
+        insert into recruit_user(id, username, introduction, major, college, phone, gender)
+        values (#{id}, #{username}, #{introduction}, #{major}, #{college}, #{phone}, #{gender})
     </insert>
     <insert id="postIp" parameterType="com.example.resource.pojo.PostIp">
         INSERT INTO userIp (ip, id)
-        VALUES (#{ip}, #{id})
-            ON DUPLICATE KEY UPDATE id = VALUES(id)
+        VALUES (#{ip}, #{id}) ON DUPLICATE KEY
+        UPDATE id =
+        VALUES (id)
     </insert>
 
     <insert id="insertVolunteerList">
@@ -27,37 +31,57 @@
     </insert>
 
 
-
     <insert id="insertMessage">
-        insert into ReviceMessage (id,message,messageId)
-        select id ,#{text},#{uuid} from recruit_user where phone=#{phone}
+        insert into ReviceMessage (id, message, messageId)
+        select id, #{text}, #{uuid}
+        from recruit_user
+        where phone = #{phone}
     </insert>
     <insert id="registerUser" parameterType="com.example.resource.pojo.UserById">
         INSERT INTO recruit_user (id, username, introduction, major, college, phone, gender)
-        VALUES (#{id}, #{username}, #{introduction}, #{major}, #{college}, #{phone}, #{gender})
-            ON DUPLICATE KEY UPDATE
-                                 username = VALUES(username),
-                                 introduction = VALUES(introduction),
-                                 major = VALUES(major),
-                                 college = VALUES(college),
-                                 phone = VALUES(phone),
-                                 gender = VALUES(gender);
+        VALUES (#{id}, #{username}, #{introduction}, #{major}, #{college}, #{phone}, #{gender}) ON DUPLICATE KEY
+        UPDATE
+            username =
+        VALUES (username), introduction =
+        VALUES (introduction), major =
+        VALUES (major), college =
+        VALUES (college), phone =
+        VALUES (phone), gender =
+        VALUES (gender);
+    </insert>
+    <insert id="InsertStatus" parameterType="com.example.resource.pojo.Status">
+        insert into status (id, department_id, status)
+        values (#{id}, #{departmentId}, 0) on duplicate key
+        update
+            department_id = values (department_id),
+                                status = values (status);
     </insert>
 
+
     <delete id="deleteMessages">
-        delete from ReviceMessage where messageId = #{uuid}
+        delete
+        from ReviceMessage
+        where messageId = #{uuid}
     </delete>
     <delete id="deleteUser">
-        delete from recruit_user where id = #{id};
+        delete
+        from recruit_user
+        where id = #{id};
     </delete>
     <delete id="deleteVolunteer">
-        delete from volunteer where id = #{id};
+        delete
+        from volunteer
+        where id = #{id};
     </delete>
     <delete id="deleteImage">
-        delete from image where id = #{id};
+        delete
+        from image
+        where id = #{id};
     </delete>
     <delete id="deleteStatus">
-        delete from status where id = #{id};
+        delete
+        from status
+        where id = #{id};
     </delete>
     <update id="setMessageStatus">
         update status SET MessageStatus=1
@@ -69,25 +93,25 @@
 
     <update id="updateUser">
         update recruit_user
-        set username = #{username},
+        set username     = #{username},
             introduction = #{introduction},
-            major = #{major},
-            college = #{college},
-            phone = #{phone},
-            gender = #{gender}
+            major        = #{major},
+            college      = #{college},
+            phone        = #{phone},
+            gender       = #{gender}
         where id = #{id}
     </update>
 
     <update id="updateVolunteer">
         update volunteer
-            set volunteer_department = #{volunteer_department},
-                level = #{level}
-        where id= #{id}
+        set volunteer_department = #{volunteer_department},
+            level                = #{level}
+        where id = #{id}
     </update>
     <update id="updateStatus">
         update status
         set department_id = #{department_id},
-            status = #{status},
+            status        = #{status},
             MessageStatus = #{MessageStatus}
         where id = #{id}
     </update>
@@ -104,7 +128,7 @@
     <update id="updateVolunteers">
         update volunteer
         set volunteer_department = #{departmentName},
-            level = #{level}
+            level                = #{level}
         where id = #{id}
     </update>
 
@@ -119,22 +143,24 @@
                WHERE department_id in
                      (SELECT department_id
                       FROM department
-                      WHERE organization_id=#{organizationId}))
+                      WHERE organization_id = #{organizationId}))
     </select>
     <select id="getVolunteer" resultType="com.example.resource.pojo.Volunteer">
         SELECT department_name,
                level
-        FROM department,volunteer
-        WHERE department_id=volunteer_department
-          AND id =#{id}
+        FROM department,
+             volunteer
+        WHERE department_id = volunteer_department
+          AND id = #{id}
     </select>
     <select id="statistics" resultType="com.example.resource.pojo.Statistics">
         SELECT COUNT(status.department_id) AS value, department.department_name as type
         FROM status
-                 JOIN department ON status.department_id = department.department_id
+            JOIN department
+        ON status.department_id = department.department_id
         WHERE department.department_id IN (
             SELECT department_id FROM department WHERE organization_id =#{organizationId}
-        )
+            )
         GROUP BY department.department_name;
 
 
@@ -145,111 +171,134 @@
         WHERE department_id IN
               (SELECT department_id
                FROM department
-               WHERE organization_id=#{organizationId})
+               WHERE organization_id = #{organizationId})
     </select>
     <select id="getImageById" resultType="com.example.resource.pojo.Image">
-        select  url from  image where id =#{id}
+        select url
+        from image
+        where id = #{id}
     </select>
     <select id="organizationExist" resultType="java.lang.Boolean">
-        select  count(*) from  organization where organization_id=#{organizationId}
+        select count(*)
+        from organization
+        where organization_id = #{organizationId}
     </select>
     <select id="getInfoByDepartment" resultType="com.example.resource.pojo.Users">
         SELECT *
         FROM recruit_user
-        WHERE id IN(SELECT id
-               FROM status
-               WHERE department_id=#{departmentId})
+        WHERE id IN (SELECT id
+                     FROM status
+                     WHERE department_id = #{departmentId})
     </select>
     <select id="getInfoByKey" resultType="com.example.resource.pojo.Users">
         SELECT distinct *
         FROM recruit_user
-        WHERE (id like  concat('%',#{key},'%')
-            OR username like  concat('%',#{key},'%')
-            OR major like  concat('%',#{key},'%')
-            OR college like  concat('%',#{key},'%')
-            OR phone like  concat('%',#{key},'%')) And id in
-            (select id  from status where department_id in(select department_id  from department
-                                                                              where organization_id=#{organizationId}) )
+        WHERE (id like concat('%', #{key}, '%')
+            OR username like concat('%', #{key}, '%')
+            OR major like concat('%', #{key}, '%')
+            OR college like concat('%', #{key}, '%')
+            OR phone like concat('%', #{key}, '%'))
+          And id in
+              (select id
+               from status
+               where department_id in (select department_id
+                                       from department
+                                       where organization_id = #{organizationId}))
     </select>
     <select id="getPersonById" resultType="com.example.resource.pojo.MessagePerson">
         SELECT DISTINCT recruit_user.id ,department_name, phone,username
         FROM recruit_user,department,status
         WHERE status.id=recruit_user.id
-          AND department.department_id=status.department_id
+        AND department.department_id=status.department_id
 
-              <if test="type =='face'"> AND status=0</if>
-              <if test="type =='pass'"> AND status=1</if>
-          AND recruit_user.id in
-              <foreach collection="list" item="item" open="(" close=")">
-                  #{item}
-              </foreach>
+        <if test="type =='face'">AND status=0</if>
+        <if test="type =='pass'">AND status=1</if>
+        AND recruit_user.id in
+        <foreach collection="list" item="item" open="(" close=")">
+            #{item}
+        </foreach>
     </select>
     <select id="geMessageByDepartment" resultType="com.example.resource.pojo.MessageDetail">
         SELECT DISTINCT recruit_user.id, username, message, ReviceMessage.messageId
-        FROM ReviceMessage, recruit_user
+        FROM ReviceMessage,
+             recruit_user
         WHERE recruit_user.id IN (SELECT id FROM status WHERE department_id = #{departmentId})
           AND recruit_user.id = ReviceMessage.id
     </select>
 
     <select id="getUserById" resultType="com.example.resource.pojo.Users">
-        select * from recruit_user where id = #{id}
+        select *
+        from recruit_user
+        where id = #{id}
     </select>
     <select id="ipLookups" resultType="java.lang.String">
-        select * from userIp where ip = #{ip}
+        select *
+        from userIp
+        where ip = #{ip}
     </select>
     <select id="ipCheck" resultType="java.lang.Boolean">
-        select COUNT(*) > 0 from userIp where ip = #{ip}
+        select COUNT(*) > 0
+        from userIp
+        where ip = #{ip}
     </select>
     <select id="getImage" resultType="com.example.resource.pojo.Image">
-        select * from image where id = #{id}
+        select *
+        from image
+        where id = #{id}
     </select>
     <select id="getMessages" resultType="com.example.resource.pojo.Message">
-        select * from ReviceMessage where id =#{id}
+        select *
+        from ReviceMessage
+        where id = #{id}
     </select>
     <select id="getStatus" resultType="com.example.resource.pojo.Status">
-        SELECT id,department_name,
-               status,MessageStatus
-        FROM status,department
-        WHERE department.department_id=status.department_id
-          AND id =#{id}
+        SELECT id,
+               department_name,
+               status,
+               MessageStatus
+        FROM status,
+             department
+        WHERE department.department_id = status.department_id
+          AND id = #{id}
     </select>
-    <select id="getVolunteers" resultType="com.example.resource.pojo.Volunteer">
-        SELECT id,department_name,
+    <select id="getVolunteers" resultType="com.example.resource.pojo.UpdateVolunteer">
+        SELECT volunteer_department,
                level
-        FROM department,volunteer
-        WHERE department_id=volunteer_department
-          AND id =#{id}
+        FROM volunteer
+        WHERE id = #{id}
         order by level
     </select>
     <select id="getStatusById" resultType="com.example.resource.pojo.UpdateStatus">
-        SELECT * FROM status WHERE id =#{id}
+        SELECT *
+        FROM status
+        WHERE id = #{id}
     </select>
     <select id="getImageByid" resultType="com.example.resource.pojo.Image">
-        SELECT * FROM image WHERE id =#{id}
+        SELECT *
+        FROM image
+        WHERE id = #{id}
     </select>
     <select id="getMessagesByUuid" resultType="com.example.resource.pojo.Message">
-        SELECT * FROM ReviceMessage WHERE messageId = #{messageId}
+        SELECT *
+        FROM ReviceMessage
+        WHERE messageId = #{messageId}
     </select>
     <select id="fetchUserData" resultType="com.example.resource.pojo.Excel">
-        SELECT
-            recruit_user.*,
-            GROUP_CONCAT(DISTINCT image.url ORDER BY image.url ASC SEPARATOR ',') AS image_urls,
-            status.status,
-            department_names.department_names
+        SELECT recruit_user.*,
+               GROUP_CONCAT(DISTINCT image.url ORDER BY image.url ASC SEPARATOR ',') AS image_urls,
+               status.status,
+               department_names.department_names
         FROM recruit_user
                  LEFT JOIN image ON recruit_user.id = image.id COLLATE utf8mb4_0900_ai_ci
                  LEFT JOIN status ON recruit_user.id = status.id COLLATE utf8mb4_0900_ai_ci
                  LEFT JOIN volunteer ON recruit_user.id = volunteer.id COLLATE utf8mb4_0900_ai_ci
-                 LEFT JOIN (
-            SELECT
-                volunteer.id AS volunteer_id,
-                GROUP_CONCAT(DISTINCT department.department_name
+                 LEFT JOIN (SELECT volunteer.id                                                                                                                   AS volunteer_id,
+                                   GROUP_CONCAT(DISTINCT department.department_name
                      ORDER BY volunteer.level ASC, department.department_name ASC
                      SEPARATOR ',') AS department_names
-            FROM volunteer
-                     INNER JOIN department ON volunteer.volunteer_department = department.department_id
-            GROUP BY volunteer.id
-        ) AS department_names ON volunteer.id = department_names.volunteer_id
+                            FROM volunteer
+                                     INNER JOIN department ON volunteer.volunteer_department = department.department_id
+                            GROUP BY volunteer.id) AS department_names ON volunteer.id = department_names.volunteer_id
         GROUP BY recruit_user.id, status.status, status.MessageStatus, department_names.department_names;
 
     </select>
@@ -258,7 +307,9 @@
         from recruit_user
         where recruit_user.id = #{id};
     </select>
-
-
-
+    <select id="invertDepartmentId" resultType="com.example.resource.pojo.DepartmentId">
+        SELECT department_id
+        FROM department
+        WHERE department_name = #{departmentId}
+    </select>
 </mapper>
