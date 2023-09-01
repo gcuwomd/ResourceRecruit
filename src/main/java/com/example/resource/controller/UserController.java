@@ -86,7 +86,7 @@ public class UserController {
 
     @PostMapping("user/register")
     ResultUtil register(HttpServletRequest request,@RequestBody JSONObject json) {
-        String ip = request.getRemoteAddr();
+        String ip = request.getHeader("X-Real-IP");
         String id = json.getString("id");
         userMapper.postIp(ip,id);
         if (user.register(json)) {
@@ -117,13 +117,13 @@ public class UserController {
 
     @PutMapping("/user/updateUser")
     public ResultUtil updateUser(HttpServletRequest request,@RequestBody JSONObject json) {
-        String ip = request.getHeader("X-Real-IP");
-        String ip1 = request.getHeader("X-Forwarded-For");
-        String ip2 = request.getHeader("X-Forwarded-Proto");
-
+//        String ip = request.getHeader("X-Real-IP");
+//        String ip = request.getHeader("X-Forwarded-For");
+//        String ip = request.getHeader("X-Forwarded-Proto");
+//          String ip = request.getHeader("REMOTE-HOST");
 
         String id = json.getString("id");
-        userMapper.postIp(ip,id);
+//        userMapper.postIp(ip,id);
         if (!departmentMapper.userExist(id)) {
             return new ResultUtil(403, "你还未报名，请检查学号", null);
         }
