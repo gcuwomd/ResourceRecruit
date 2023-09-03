@@ -8,7 +8,8 @@ import com.example.resource.mapper.UserMapper;
 import com.example.resource.pojo.*;
 import com.example.resource.util.MeaasgeUtil;
 import com.example.resource.util.OssUtil;
-import jakarta.servlet.http.HttpServletRequest;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class UserService implements User {
@@ -34,11 +33,14 @@ public class UserService implements User {
      * 查询所有报名情况
      */
     @Override
-    public JSONArray allInfo(String organizationId) {
+    public PageBean allInfo(String organizationId, Integer page, Integer pageSize) {
+        PageHelper.startPage(page,pageSize);
         //查看是否存在组织
         List<Users> list = userMapper.getAllInfo(organizationId);
+        Page<Users> p = (Page<Users>) list;
         JSONArray info = this.personDescript(list);
-        return info;
+        PageBean pageBean = new PageBean(info,p.getTotal());
+        return pageBean;
     }
 
     @Override

@@ -60,6 +60,12 @@
             <artifactId>cmq-http-client</artifactId>
             <version>1.0.7</version>
         </dependency>
+        <!-- pageHelper-->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.4.6</version>
+        </dependency>
         <dependency>
             <groupId>com.tencentcloudapi</groupId>
             <artifactId>tencentcloud-sdk-java</artifactId>

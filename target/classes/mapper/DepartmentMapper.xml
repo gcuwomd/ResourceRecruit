@@ -23,7 +23,7 @@
         UPDATE  status set status =1,MessageStatus=0 where id=#{id};
     </update>
     <update id="changeToNoPassStatus">
-        UPDATE  status set status =-1,,MessageStatus=0  where id=#{id}
+        UPDATE  status set status =-1,MessageStatus=0  where id=#{id}
 
     </update>
 

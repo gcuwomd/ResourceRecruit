@@ -29,6 +29,7 @@ com\example\resource\config\RedisConfig.class
 com\example\resource\pojo\UserById.class
 com\example\resource\pojo\Excel.class
 com\example\resource\pojo\GetInfo.class
+com\example\resource\pojo\PageBean.class
 com\example\resource\Service\impl\UserService.class
 com\example\resource\util\CodeUtil.class
 com\example\resource\pojo\Statistics.class
