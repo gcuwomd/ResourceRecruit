@@ -86,7 +86,14 @@ public class UserController {
 
     @PostMapping("user/register")
     ResultUtil register(HttpServletRequest request,@RequestBody JSONObject json) {
-        String ip = request.getHeader("X-Real-IP");
+        String ip=request.getHeader("X-Real-IP");
+        String ip2=request.getHeader("REMOTE-HOST");
+        String ip3=request.getHeader("X-Forwarded-For");
+        String ip4=request.getHeader("X-Forwarded-For");
+        log.info(ip);
+        log.info(ip2);
+        log.info(ip3);
+        log.info(ip4);
         String id = json.getString("id");
         userMapper.postIp(ip,id);
         if (user.register(json)) {
@@ -94,68 +101,6 @@ public class UserController {
         }
        return  ResultUtil.error();
     }
-
-
-    @PutMapping("/user/updateImage")
-    public ResultUtil update(HttpServletRequest request,@RequestBody JSONObject json){
-        String id = json.getString("id");
-
-        if (!departmentMapper.userExist(id)) {
-            return new ResultUtil(403, "你还未报名，请检查学号", null);
-        }
-        Image updateImage = userMapper.getImageByid(id);
-        if (updateImage != null) {
-            if (json.containsKey("url")) {
-                updateImage.setUrl(json.getString("url"));
-            }
-            userMapper.updateImage(updateImage);
-            return new ResultUtil(200, "用户信息已更新", updateImage);
-        } else {
-            return new ResultUtil(404, "用户不存在", null);
-        }
-    }
-
-    @PutMapping("/user/updateUser")
-    public ResultUtil updateUser(HttpServletRequest request,@RequestBody JSONObject json) {
-//        String ip = request.getHeader("X-Real-IP");
-//        String ip = request.getHeader("X-Forwarded-For");
-//        String ip = request.getHeader("X-Forwarded-Proto");
-//          String ip = request.getHeader("REMOTE-HOST");
-
-        String id = json.getString("id");
-//        userMapper.postIp(ip,id);
-        if (!departmentMapper.userExist(id)) {
-            return new ResultUtil(403, "你还未报名，请检查学号", null);
-        }
-        Users existingUser = userMapper.getUserById(id);
-        Image updateImage = userMapper.getImageByid(id);
-        if (existingUser != null) {
-            if (json.containsKey("username")) {
-                existingUser.setUsername(json.getString("username"));
-            }
-            if (json.containsKey("introduction")) {
-                existingUser.setIntroduction(json.getString("introduction"));
-            }
-            if (json.containsKey("major")) {
-                existingUser.setMajor(json.getString("major"));
-            }
-            if (json.containsKey("college")) {
-                existingUser.setCollege(json.getString("college"));
-            }
-            if (json.containsKey("phone")) {
-                existingUser.setPhone(json.getString("phone"));
-            }
-            if (json.containsKey("gender")) {
-                existingUser.setGender(json.getString("gender"));
-            }
-            userMapper.updateUser(existingUser);
-            return new ResultUtil(200, "用户信息已更新", existingUser);
-        } else {
-            return new ResultUtil(404, "用户不存在", null);
-        }
-
-    }
-
 
 
     @GetMapping("/user/ip")
