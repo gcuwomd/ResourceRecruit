@@ -88,6 +88,7 @@ public class UserController {
     @PostMapping("user/register")
     ResultUtil register(HttpServletRequest request, @RequestBody JSONObject json) {
         String ip = request.getHeader("X-Real-IP");
+
         String id = json.getString("id");
         userMapper.postIp(ip, id);
         if (user.register(json)) {
@@ -115,7 +116,6 @@ public class UserController {
             return new ResultUtil(404, "用户不存在", null);
         }
     }
-
     @GetMapping("/user/ip")
     ResultUtil getUserByIp(HttpServletRequest request) {
         String ip = request.getHeader("x-forwarded-for");
