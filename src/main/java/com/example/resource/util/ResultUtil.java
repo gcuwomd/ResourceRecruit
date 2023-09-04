@@ -14,9 +14,9 @@ public class ResultUtil {
     private String message;
     private Object data;
 
-    public ResultUtil(Integer code, String messagesg, Object data) {
+    public ResultUtil(Integer code, String message, Object data) {
         this.code = code;
-        this.message = messagesg;
+        this.message = message;
         this.data = data;
     }
 

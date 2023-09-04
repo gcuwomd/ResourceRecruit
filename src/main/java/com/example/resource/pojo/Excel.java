@@ -25,8 +25,6 @@ public class Excel {
     private String gender;
     @ExcelProperty("志愿")
     private String departmentNames;
-    @ExcelProperty("地位")
-    private String status;
     @ExcelProperty("图片链接")
     private String imageUrls;
 }

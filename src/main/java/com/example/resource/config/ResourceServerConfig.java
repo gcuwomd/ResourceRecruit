@@ -30,7 +30,7 @@ public class ResourceServerConfig {
         http.authorizeHttpRequests(authorize -> authorize
                         // 下边一行是放行接口的配置，被放行的接口上不能有权限注解，e.g @PreAuthorize，否则无效
                         .requestMatchers( HttpMethod.POST,"/user/register","/putPhoto","/sms/callback").permitAll()
-                        .requestMatchers("/user/ip").permitAll()
+                        .requestMatchers("/user/ip","download/excel").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())

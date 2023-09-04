@@ -14,6 +14,7 @@ import com.example.resource.util.uuidUtil;
 import com.qcloud.cos.utils.IOUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jdk.jfr.Name;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,10 +38,10 @@ public class UserController {
     User user;
 
     @GetMapping("/user/info/all")
-    ResultUtil allinfo(@RequestParam String organizationId) {
+    ResultUtil allinfo(@RequestParam String organizationId, @RequestParam(defaultValue  = "1") Integer page, @RequestParam(defaultValue = "10")Integer pageSize) {
         if (!(userMapper.organizationExist(organizationId)))
             return new ResultUtil(400, "组织编号不存在", null);
-        return ResultUtil.sucess(user.allInfo(organizationId));
+        return ResultUtil.sucess(user.allInfo(organizationId,page,pageSize));
     }
 
     @PostMapping(value = "/putPhoto", consumes = "multipart/form-data")
@@ -85,30 +86,42 @@ public class UserController {
     }
 
     @PostMapping("user/register")
-    ResultUtil register(HttpServletRequest request,@RequestBody JSONObject json) {
-        String ip=request.getHeader("X-Real-IP");
-        String ip2=request.getHeader("REMOTE-HOST");
-        String ip3=request.getHeader("X-Forwarded-For");
-        String ip4=request.getHeader("X-Forwarded-For");
-        log.info(ip);
-        log.info(ip2);
-        log.info(ip3);
-        log.info(ip4);
+    ResultUtil register(HttpServletRequest request, @RequestBody JSONObject json) {
+        String ip = request.getHeader("X-Real-IP");
+
         String id = json.getString("id");
-        userMapper.postIp(ip,id);
+        userMapper.postIp(ip, id);
         if (user.register(json)) {
             return ResultUtil.sucess();
         }
-       return  ResultUtil.error();
+        return ResultUtil.error();
     }
 
 
+    @PutMapping("/user/updateImage")
+    public ResultUtil update(HttpServletRequest request, @RequestBody JSONObject json) {
+        String id = json.getString("id");
+
+        if (!departmentMapper.userExist(id)) {
+            return new ResultUtil(403, "你还未报名，请检查学号", null);
+        }
+        Image updateImage = userMapper.getImageByid(id);
+        if (updateImage != null) {
+            if (json.containsKey("url")) {
+                updateImage.setUrl(json.getString("url"));
+            }
+            userMapper.updateImage(updateImage);
+            return new ResultUtil(200, "用户信息已更新", updateImage);
+        } else {
+            return new ResultUtil(404, "用户不存在", null);
+        }
+    }
     @GetMapping("/user/ip")
     ResultUtil getUserByIp(HttpServletRequest request) {
         String ip = request.getHeader("x-forwarded-for");
         String id = userMapper.ipLookups(ip);
         if (id != null) {
-            return new ResultUtil(200, "查询成功",  user.getUserByIp(id));
+            return new ResultUtil(200, "查询成功", user.getUserByIp(id));
         } else {
             return new ResultUtil(404, "用户不存在", null);
         }
@@ -129,7 +142,6 @@ public class UserController {
         List list = user.sendMessage(MessageInfo);
         if (list.isEmpty()) return ResultUtil.sucess();
         return ResultUtil.sucess(list);
-
     }
 
     @PostMapping("/sms/callback")
@@ -158,17 +170,21 @@ public class UserController {
     }
 
     @GetMapping("download/excel")
-    public void download(HttpServletResponse response) throws IOException {
+    public void downloadExcal(HttpServletResponse response) throws IOException {
         // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
-        String fileName = URLEncoder.encode("测试", "UTF-8").replaceAll("\\+", "%20");
+        String fileName = URLEncoder.encode("", "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
         EasyExcel.write(response.getOutputStream(), Excel.class).sheet("模板").doWrite(getExcelData());
     }
+
     private List<Excel> getExcelData() {
         List<Excel> userData = userMapper.fetchUserData();
+        if (userData == null){
+            return null;
+        }
         return userData;
     }
 

@@ -2,10 +2,8 @@ package com.example.resource.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.example.resource.pojo.Excel;
+import com.example.resource.pojo.PageBean;
 import com.example.resource.pojo.Users;
-import com.example.resource.util.ResultUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface User {
-    JSONArray allInfo(String  organizationId);
+    PageBean allInfo(String  organizationId, Integer page, Integer pageSize);
     JSONObject departmentData(String organizationId);
 
     JSONArray InfoByDepartment(String departmentId);
