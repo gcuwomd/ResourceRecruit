@@ -1,6 +1,5 @@
 package com.example.resource.mapper;
 
-import com.alibaba.fastjson.JSONArray;
 import com.example.resource.pojo.*;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -89,7 +88,7 @@ public interface UserMapper {
 
     void updateVolunteer(ArrayList updatedVolunteerList);
 
-    List<Excel> fetchUserData();
+    List<WriteExcel> fetchUserData();
 
     UserGetById userGetById(String id);
 
