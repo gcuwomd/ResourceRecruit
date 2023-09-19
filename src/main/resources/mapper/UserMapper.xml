@@ -283,7 +283,7 @@
         FROM ReviceMessage
         WHERE messageId = #{messageId}
     </select>
-    <select id="fetchUserData" resultType="com.example.resource.pojo.Excel">
+    <select id="fetchUserData" resultType="com.example.resource.pojo.WriteExcel">
         SELECT recruit_user.*,
                GROUP_CONCAT(DISTINCT image.url ORDER BY image.url ASC SEPARATOR ',') AS image_urls,
                status.status,

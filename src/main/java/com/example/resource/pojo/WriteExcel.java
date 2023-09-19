@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Excel {
+public class WriteExcel {
     @ExcelProperty("姓名")
     private String username;
     @ExcelProperty("学号")

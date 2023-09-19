@@ -1,23 +1,23 @@
 package com.example.resource.controller;
 
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.resource.Listener.ExcelDataListener;
 import com.example.resource.Service.User;
 import com.example.resource.Service.impl.UserService;
 import com.example.resource.mapper.DepartmentMapper;
+import com.example.resource.mapper.ListenerMapper;
 import com.example.resource.mapper.UserMapper;
 import com.example.resource.pojo.*;
 import com.example.resource.util.OssUtil;
 import com.example.resource.util.ResultUtil;
 import com.example.resource.util.uuidUtil;
-import com.qcloud.cos.utils.IOUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jdk.jfr.Name;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,6 +36,8 @@ public class UserController {
     OssUtil ossUtil;
     @Autowired
     User user;
+    @Autowired
+    ListenerMapper listenerMapper;
 
     @GetMapping("/user/info/all")
     ResultUtil allinfo(@RequestParam String organizationId, @RequestParam(defaultValue  = "1") Integer page, @RequestParam(defaultValue = "10")Integer pageSize) {
@@ -177,17 +179,28 @@ public class UserController {
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
         String fileName = URLEncoder.encode("", "UTF-8").replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-        EasyExcel.write(response.getOutputStream(), Excel.class).sheet("模板").doWrite(getExcelData());
+        EasyExcel.write(response.getOutputStream(), WriteExcel.class).sheet("模板").doWrite(getExcelData());
     }
 
-    private List<Excel> getExcelData() {
-        List<Excel> userData = userMapper.fetchUserData();
+    private List<WriteExcel> getExcelData() {
+        List<WriteExcel> userData = userMapper.fetchUserData();
         if (userData == null){
             return null;
         }
         return userData;
     }
 
-}
+
+
+        @PostMapping("/upload")
+        public String upload(@RequestParam("file") MultipartFile file) throws IOException {
+            if (file != null) {
+                EasyExcel.read(file.getInputStream(), ReadExcel.class, new ExcelDataListener(listenerMapper)).sheet().doRead();
+                return "success";
+            } else {
+                return "file 为 null";
+            }
+        }
+    }
 
 
