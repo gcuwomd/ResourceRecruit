@@ -25,7 +25,7 @@ public class ResultUtil {
         return  new ResultUtil(200,"success",data);
     }
     public  static ResultUtil sucess(){
-        return  new ResultUtil(200,"sucess",null);
+        return  new ResultUtil(200,"success",null);
     }
     public  static ResultUtil error(){
         return  new ResultUtil(0,"error",null);

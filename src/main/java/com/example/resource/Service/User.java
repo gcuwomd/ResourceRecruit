@@ -4,15 +4,18 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.resource.pojo.PageBean;
 import com.example.resource.pojo.Users;
+import com.example.resource.pojo.WriteExcel;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public interface User {
-    PageBean allInfo(String  organizationId, Integer page, Integer pageSize);
+    PageBean allInfo(String organizationId, Integer page, Integer pageSize);
+
     JSONObject departmentData(String organizationId);
 
     JSONArray InfoByDepartment(String departmentId);
@@ -20,10 +23,7 @@ public interface User {
     @Transactional(rollbackFor = Exception.class)
     boolean register(@RequestBody JSONObject json);
 
-
     JSONObject getUserByIp(String id);
-
-    void updateUserInfo(Users updateUser, ArrayList updateArrayList);
 
     void deleteUser(String id);
 
@@ -31,11 +31,15 @@ public interface User {
 
     boolean OssPut(MultipartFile image, String id);
 
-   List sendMessage(JSONObject messageInfo);
+    List sendMessage(JSONObject messageInfo);
 
     void deleteVolunteer(String id);
 
     void deleteImage(String id);
 
     void deleteStatus(String id);
+
+    List<WriteExcel> getExcelData();
+
+//    List<WriteExcel> getPassUser();
 }

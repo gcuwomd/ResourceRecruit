@@ -16,8 +16,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,10 +38,10 @@ public class UserController {
     ListenerMapper listenerMapper;
 
     @GetMapping("/user/info/all")
-    ResultUtil allinfo(@RequestParam String organizationId, @RequestParam(defaultValue  = "1") Integer page, @RequestParam(defaultValue = "10")Integer pageSize) {
+    ResultUtil allinfo(@RequestParam String organizationId, @RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer pageSize) {
         if (!(userMapper.organizationExist(organizationId)))
             return new ResultUtil(400, "组织编号不存在", null);
-        return ResultUtil.sucess(user.allInfo(organizationId,page,pageSize));
+        return ResultUtil.sucess(user.allInfo(organizationId, page, pageSize));
     }
 
     @PostMapping(value = "/putPhoto", consumes = "multipart/form-data")
@@ -178,29 +176,30 @@ public class UserController {
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
         String fileName = URLEncoder.encode("", "UTF-8").replaceAll("\\+", "%20");
-        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
-        EasyExcel.write(response.getOutputStream(), WriteExcel.class).sheet("模板").doWrite(getExcelData());
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + "报名成员名单.xlsx");
+        EasyExcel.write(response.getOutputStream(), WriteExcel.class).sheet("模板").doWrite(user.getExcelData());
     }
 
-    private List<WriteExcel> getExcelData() {
-        List<WriteExcel> userData = userMapper.fetchUserData();
-        if (userData == null){
-            return null;
+//    @GetMapping("/download/passUser")
+//    public void downloadPassUser(HttpServletResponse response) throws IOException {
+//        // 这里注意 有同学反应使用swagger 会导致各种问题，请直接用浏览器或者用postman
+//        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+//        response.setCharacterEncoding("utf-8");
+//        // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
+//        String fileName = URLEncoder.encode("", "UTF-8").replaceAll("\\+", "%20");
+//        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+//        EasyExcel.write(response.getOutputStream(), WriteExcel.class).sheet("模板").doWrite(user.getPassUser());
+//    }
+
+    @PostMapping("/upload")
+    public ResultUtil upload(@RequestParam("file") MultipartFile file) throws IOException {
+        if (file != null) {
+            EasyExcel.read(file.getInputStream(), ReadExcel.class, new ExcelDataListener(listenerMapper)).sheet().doRead();
+            return ResultUtil.sucess();
+        } else {
+            return ResultUtil.error();
         }
-        return userData;
     }
-
-
-
-        @PostMapping("/upload")
-        public String upload(@RequestParam("file") MultipartFile file) throws IOException {
-            if (file != null) {
-                EasyExcel.read(file.getInputStream(), ReadExcel.class, new ExcelDataListener(listenerMapper)).sheet().doRead();
-                return "success";
-            } else {
-                return "file 为 null";
-            }
-        }
-    }
+}
 
 

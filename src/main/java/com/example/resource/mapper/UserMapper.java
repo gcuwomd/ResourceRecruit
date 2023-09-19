@@ -30,7 +30,7 @@ public interface UserMapper {
 
     boolean insertUsers(Users users);
 
-    boolean insertVolunteerList(List list,String id);
+    boolean insertVolunteerList(List list, String id);
 
     List<MessagePerson> getPersonById(String type, List list);
 
@@ -40,8 +40,6 @@ public interface UserMapper {
 
     List<MessageDetail> geMessageByDepartment(String departmentId);
 
-
-
     void deleteUser(String id);
 
     void deleteVolunteer(String id);
@@ -49,10 +47,6 @@ public interface UserMapper {
     void deleteImage(String id);
 
     void deleteStatus(String id);
-
-    void updateUser(Users updatedUser);
-
-
 
     Users getUserById(String id);
 
@@ -92,15 +86,9 @@ public interface UserMapper {
 
     UserGetById userGetById(String id);
 
-    void registerImage(String id,String url);
-
     void registerUser(String id, String username, String introduction, String major, String college, String gender, String phone);
-
-
-    void insertVolunteer(String id, ArrayList arrayList);
-
 
     void InsertStatus(String id, String departmentId);
 
-    String invertDepartmentId(String departmentId);
+    List<WriteExcel> passUser(String id);
 }
