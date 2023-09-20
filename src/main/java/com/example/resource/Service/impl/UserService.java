@@ -1,9 +1,12 @@
 package com.example.resource.Service.impl;
 
+import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.resource.Listener.ExcelDataListener;
 import com.example.resource.Service.User;
+import com.example.resource.mapper.ListenerMapper;
 import com.example.resource.mapper.UserMapper;
 import com.example.resource.pojo.*;
 import com.example.resource.util.MeaasgeUtil;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +39,12 @@ public class UserService implements User {
      */
     @Override
     public PageBean allInfo(String organizationId, Integer page, Integer pageSize) {
-        PageHelper.startPage(page, pageSize);
+        PageHelper.startPage(page,pageSize);
         //查看是否存在组织
         List<Users> list = userMapper.getAllInfo(organizationId);
         Page<Users> p = (Page<Users>) list;
         JSONArray info = this.personDescript(list);
-        PageBean pageBean = new PageBean(info, p.getTotal());
+        PageBean pageBean = new PageBean(info,p.getTotal());
         return pageBean;
     }
 
@@ -81,21 +85,23 @@ public class UserService implements User {
 
         userMapper.registerUser(id, username, introduction, major, college, gender, phone);
         userMapper.deleteVolunteer(id);
-        userMapper.insertVolunteerList(volunteerArray, id);
+        userMapper.insertVolunteerList(volunteerArray,id);
         for (Object item : volunteerArray) {
             JSONObject object = (JSONObject) JSON.toJSON(item);
             Integer level = Integer.parseInt(object.getString("level"));
             if (level == 1) {
-                userMapper.InsertStatus(id, object.getString("departmentId"));
+                userMapper.InsertStatus(id,object.getString("departmentId"));
             }
         }
         return true;
     }
 
     @Override
-    public JSONObject getUserByIp(String id) {
+    public JSONObject getUserByIp(String id){
         UserGetById userGetById = userMapper.userGetById(id);
+
         List<UpdateVolunteer> volunteers = userMapper.getVolunteers(id);
+
         JSONObject json = (JSONObject) JSON.toJSON(userGetById);
         json.put("volunteer", volunteers);
         return json;
@@ -103,27 +109,51 @@ public class UserService implements User {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteUser(String id) {
+    public void updateUserInfo(Users updatedUser, ArrayList updatedVolunteerList) {
+        userMapper.updateUser(updatedUser);
+        String id = updatedUser.getId();
+        for (Object item : updatedVolunteerList) {
+            JSONObject object = (JSONObject) JSON.toJSON(item);
+            Integer level = Integer.parseInt(object.getString("level"));
+            userMapper.updateVolunteer(updatedVolunteerList);
+            if (level == 1) {
+                userMapper.insertStatus(id, object.getString("volunteer"));
+            }
+        }
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteUser(String id){
         userMapper.deleteUser(id);
     }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteVolunteer(String id) {
+    public void deleteVolunteer(String id){
         userMapper.deleteVolunteer(id);
     }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteImage(String id) {
+    public void deleteImage(String id){
         userMapper.deleteImage(id);
     }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteStatus(String id) {
+    public void deleteStatus(String id){
         userMapper.deleteStatus(id);
     }
+
+    @Override
+    public boolean rememberInComment(Comment comment) {
+       return userMapper.rememberInComment(comment);
+    }
+
+    @Override
+    public List<Comment> getComment(String id) {
+        return userMapper.getComment(id);
+    }
+
 
     /**
      * @param key 根据关键词查找用户信息
@@ -171,7 +201,7 @@ public class UserService implements User {
                 }
                 if (!(sucessList.isEmpty())) failList.add(messagePerson.getId());
             }
-        } else if (type.equals("fail")) {
+        }else if (type.equals("fail")){
             for (MessagePerson messagePerson : personList) {
                 meaasgeUtil.sendFaceMessage(messagePerson);
                 if ((meaasgeUtil.sendPassMessage(messagePerson)).equals("Ok")) {
@@ -179,7 +209,7 @@ public class UserService implements User {
                 }
                 if (!(sucessList.isEmpty())) failList.add(messagePerson.getId());
             }
-        } else {
+        }else {
 
         }
         return failList;
@@ -207,19 +237,4 @@ public class UserService implements User {
         }
         return array_userInfo;
     }
-
-    public List<WriteExcel> getExcelData() {
-        List<WriteExcel> userData = userMapper.fetchUserData();
-        if (userData == null) {
-            return null;
-        }
-        return userData;
-    }
-
-//    public List<WriteExcel> getPassUser() {
-//        List<String> passUserIds = userMapper.passUserID();
-//        List<WriteExcel> passUsers = userMapper.passUser(passUserIds);
-//        return passUsers;
-//    }
-
 }

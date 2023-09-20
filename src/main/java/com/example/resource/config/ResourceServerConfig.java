@@ -30,11 +30,12 @@ public class ResourceServerConfig {
         http.authorizeHttpRequests(authorize -> authorize
                         // 下边一行是放行接口的配置，被放行的接口上不能有权限注解，e.g @PreAuthorize，否则无效
                         .requestMatchers( HttpMethod.POST,"/user/register","/putPhoto","/sms/callback").permitAll()
-                        .requestMatchers("/user/ip","download/excel","/download/passUser").permitAll()
+                        .requestMatchers("download/excel","/user/info/all","comment").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())
-                .csrf(csrf->csrf.ignoringRequestMatchers("/user/register","/putPhoto","/sms/callback"))
+
+                .csrf(csrf->csrf.ignoringRequestMatchers("/user/register","/putPhoto","/sms/callback","/user/info/all"))
                 .oauth2ResourceServer(oauth2 -> oauth2
                                 // 可在此处添加自定义解析设置
                                 .jwt(Customizer.withDefaults())
