@@ -5,6 +5,7 @@ import com.example.resource.mapper.ListenerMapper;
 import com.example.resource.pojo.ReadExcel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 public class ExcelDataListener extends AnalysisEventListener<ReadExcel> {
@@ -16,6 +17,7 @@ public class ExcelDataListener extends AnalysisEventListener<ReadExcel> {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void invoke(ReadExcel data, AnalysisContext context) {
         // 在这里处理 Excel 中的数据，将其保存到数据库
         listenerMapper.insertRecruitUser(data);

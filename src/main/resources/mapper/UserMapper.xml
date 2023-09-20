@@ -93,18 +93,6 @@
             #{id}
         </foreach>
     </update>
-
-    <update id="updateUser">
-        update recruit_user
-        set username     = #{username},
-            introduction = #{introduction},
-            major        = #{major},
-            college      = #{college},
-            phone        = #{phone},
-            gender       = #{gender}
-        where id = #{id}
-    </update>
-
     <update id="updateVolunteer">
         update volunteer
         set volunteer_department = #{volunteer_department},
@@ -310,10 +298,31 @@
         from recruit_user
         where recruit_user.id = #{id};
     </select>
-    <select id="invertDepartmentId" resultType="com.example.resource.pojo.DepartmentId">
-        SELECT department_id
-        FROM department
-        WHERE department_name = #{departmentId}
+    <select id="passUserID" resultType="java.lang.String">
+        SELECT id
+        FROM status
+        WHERE status = 1;
+    </select>
+    <select id="passUser" resultType="com.example.resource.pojo.WriteExcel">
+        SELECT recruit_user.*,
+               GROUP_CONCAT(DISTINCT image.url ORDER BY image.url ASC SEPARATOR ',') AS image_urls,
+               status.status,
+               department_names.department_names
+        FROM recruit_user
+                 LEFT JOIN image ON recruit_user.id = image.id COLLATE utf8mb4_0900_ai_ci
+                 LEFT JOIN status ON recruit_user.id = status.id COLLATE utf8mb4_0900_ai_ci
+                 LEFT JOIN volunteer ON recruit_user.id = volunteer.id COLLATE utf8mb4_0900_ai_ci
+                 LEFT JOIN (
+            SELECT volunteer.id AS volunteer_id,
+                   GROUP_CONCAT(DISTINCT department.department_name ORDER BY volunteer.level ASC, department.department_name ASC SEPARATOR ',') AS department_names
+            FROM volunteer
+                     INNER JOIN department ON volunteer.volunteer_department = department.department_id
+            GROUP BY volunteer.id
+        ) AS department_names ON volunteer.id = department_names.volunteer_id
+        WHERE recruit_user.id IN <foreach collection="passUserIds" item="userId">
+        #{id}
+    </foreach>
+        GROUP BY recruit_user.id, status.status, status.MessageStatus, department_names.department_names;
     </select>
     <select id="getComment" resultType="com.example.resource.pojo.Comment">
         select  comment from comment where id=#{id}
