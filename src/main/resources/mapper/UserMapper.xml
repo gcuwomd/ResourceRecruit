@@ -56,6 +56,9 @@
             department_id = values (department_id),
                                 status = values (status);
     </insert>
+    <insert id="rememberInComment" >
+        insert into comment (id, comment) values (#{id},#{comment})
+    </insert>
 
 
     <delete id="deleteMessages">
@@ -311,5 +314,8 @@
         SELECT department_id
         FROM department
         WHERE department_name = #{departmentId}
+    </select>
+    <select id="getComment" resultType="com.example.resource.pojo.Comment">
+        select  comment from comment where id=#{id}
     </select>
 </mapper>

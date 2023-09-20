@@ -144,6 +144,15 @@ public class UserService implements User {
         userMapper.deleteStatus(id);
     }
 
+    @Override
+    public boolean rememberInComment(Comment comment) {
+       return userMapper.rememberInComment(comment);
+    }
+
+    @Override
+    public List<Comment> getComment(String id) {
+        return userMapper.getComment(id);
+    }
 
 
     /**

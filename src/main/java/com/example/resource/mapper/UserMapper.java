@@ -92,15 +92,18 @@ public interface UserMapper {
 
     UserGetById userGetById(String id);
 
-    void registerImage(String id,String url);
 
     void registerUser(String id, String username, String introduction, String major, String college, String gender, String phone);
 
 
-    void insertVolunteer(String id, ArrayList arrayList);
+
 
 
     void InsertStatus(String id, String departmentId);
 
-    String invertDepartmentId(String departmentId);
+
+
+    boolean rememberInComment(Comment comment);
+
+    List<Comment> getComment(String id);
 }

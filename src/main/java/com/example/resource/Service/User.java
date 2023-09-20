@@ -2,6 +2,7 @@ package com.example.resource.Service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.resource.pojo.Comment;
 import com.example.resource.pojo.PageBean;
 import com.example.resource.pojo.Users;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,4 +39,8 @@ public interface User {
     void deleteImage(String id);
 
     void deleteStatus(String id);
+
+    boolean rememberInComment(Comment comment);
+
+    List <Comment> getComment(String id);
 }

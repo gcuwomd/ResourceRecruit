@@ -189,7 +189,20 @@ public class UserController {
         }
         return userData;
     }
-
+    /**
+     * 写入已面试部门的评价
+    * */
+    @PostMapping("/remember/comment")
+    ResultUtil rememberInComment(@RequestBody Comment comment){
+        if (user.rememberInComment(comment)) {
+            return ResultUtil.sucess();
+        }
+        return ResultUtil.error();
+    }
+    @GetMapping("/comment")
+    ResultUtil commentById(@RequestParam String id){
+       return ResultUtil.sucess(user.getComment(id)) ;
+    }
 
 
         @PostMapping("/upload")
